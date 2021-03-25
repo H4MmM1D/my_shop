@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import 'product.dart';
 
@@ -55,18 +57,52 @@ class Products with ChangeNotifier {
     return _items.where((element) => element.isFavorite).toList();
   }
 
-  void addProduct(Product product) {
-    final newProduct = new Product(
-      title: product.title,
-      description: product.description,
-      imageUrl: product.imageUrl,
-      price: product.price,
-      id: DateTime.now().toString(),
-    );
+  Future<void> addProduct(Product product) {
+    // const url =
+    //     'https://flutter-update-65521-default-rtdb.firebaseio.com/products.json';
 
-    _items.add(newProduct);
-    // _items.insert(0, newProduct); at the start of the line
-    notifyListeners();
+    // http.post(
+    //   Uri.http('195.28.11.123', 'api/project/addproject'),
+    //   headers: <String, String>{
+    //     'Content-Type': 'application/json; charset=UTF-8',
+    //   },
+    //   body: json.encode({
+    //     "name": "test from andoird",
+    //     "estimatedDelivery": "2021-03-23T10:10:55.478Z",
+    //     "deadline": "2021-03-23T10:10:55.478Z"
+    //   }),
+    // );
+
+    return http
+        .post(
+      Uri.https(
+          'flutter-update-65521-default-rtdb.firebaseio.com', 'products.json'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+        'isFavorite': product.isFavorite,
+      }),
+    )
+        .then((response) {
+      print(json.decode(response.body));
+      final newProduct = new Product(
+          title: product.title,
+          description: product.description,
+          imageUrl: product.imageUrl,
+          price: product.price,
+          id: json.decode(response.body)['name']);
+
+      _items.add(newProduct);
+      // _items.insert(0, newProduct); at the start of the line
+      notifyListeners();
+    }).catchError((error) {
+      throw error;
+    });
   }
 
   // void showFavoritesOnly() {

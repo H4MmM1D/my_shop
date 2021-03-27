@@ -16,17 +16,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
   var _isLoading = false;
   @override
   void initState() {
-    Future.delayed(Duration.zero).then((_) async {
-      setState(() {
-        _isLoading = true;
-      });
+    //Future.delayed(Duration.zero).then((_) async { //we remove it if we have listen false on the provider
 
-      await Provider.of<Orders>(context, listen: false).fetchAndSetOrders();
+    _isLoading = true; //this will run before build method runs
 
+    Provider.of<Orders>(context, listen: false).fetchAndSetOrders().then((_) {
       setState(() {
         _isLoading = false;
       });
     });
+
+    //});
     super.initState();
   }
 

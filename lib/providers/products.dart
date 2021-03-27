@@ -63,6 +63,11 @@ class Products with ChangeNotifier {
       final response = await http.get(Uri.https(
           'flutter-update-65521-default-rtdb.firebaseio.com', 'products.json'));
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
+
+      if (extractedData == null) {
+        return;
+      }
+
       final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -169,24 +174,23 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async {
     final existingProductIndex =
         _items.indexWhere((element) => element.id == id);
     var existingProduct = _items[existingProductIndex];
-    http
-        .delete(
-      Uri.https('flutter-update-65521-default-rtdb.firebaseio.com', '$id'),
-    )
-        .then((response) {
-      if (response.statusCode >= 400) {
-        throw HttpException('Could not delete product!');
-      }
-      existingProduct = null;
-    }).catchError((error) {
-      _items.insert(existingProductIndex, existingProduct);
-      notifyListeners();
-    });
+
     _items.removeAt(existingProductIndex);
     notifyListeners();
+
+    final response = await http.delete(
+      Uri.https('flutter-update-65521-default-rtdb.firebaseio.com', '$id.json'),
+    );
+
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException('Could not delete product!');
+    }
+    existingProduct = null;
   }
 }

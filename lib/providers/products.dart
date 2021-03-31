@@ -99,24 +99,18 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    // const url =
-    //     'https://flutter-update-65521-default-rtdb.firebaseio.com/products.json';
-
-    // http.post(
-    //   Uri.http('195.28.11.123', 'api/project/addproject'),
-    //   headers: <String, String>{
-    //     'Content-Type': 'application/json; charset=UTF-8',
-    //   },
-    //   body: json.encode({
-    //     "name": "test from andoird",
-    //     "estimatedDelivery": "2021-03-23T10:10:55.478Z",
-    //     "deadline": "2021-03-23T10:10:55.478Z"
-    //   }),
-    // );
     try {
+      var endpointUrl =
+          'https://flutter-update-65521-default-rtdb.firebaseio.com/products.json';
+      Map<String, String> queryParams = {
+        'auth': _authToken,
+      };
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      var requestUrl = endpointUrl + '?' + queryString;
+
       final response = await http.post(
-        Uri.https('flutter-update-65521-default-rtdb.firebaseio.com',
-            'products.json'),
+        requestUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -163,9 +157,17 @@ class Products with ChangeNotifier {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
       try {
+        var endpointUrl =
+            'https://flutter-update-65521-default-rtdb.firebaseio.com/products/$id.json';
+        Map<String, String> queryParams = {
+          'auth': _authToken,
+        };
+        String queryString = Uri(queryParameters: queryParams).query;
+
+        var requestUrl = endpointUrl + '?' + queryString;
+
         await http.patch(
-          Uri.https(
-              'flutter-update-65521-default-rtdb.firebaseio.com', '$id.json'),
+          requestUrl,
           body: json.encode(
             {
               'title': newProduct.title,
@@ -193,8 +195,17 @@ class Products with ChangeNotifier {
     _items.removeAt(existingProductIndex);
     notifyListeners();
 
+    var endpointUrl =
+        'https://flutter-update-65521-default-rtdb.firebaseio.com/products/$id.json';
+    Map<String, String> queryParams = {
+      'auth': _authToken,
+    };
+    String queryString = Uri(queryParameters: queryParams).query;
+
+    var requestUrl = endpointUrl + '?' + queryString;
+
     final response = await http.delete(
-      Uri.https('flutter-update-65521-default-rtdb.firebaseio.com', '$id.json'),
+      requestUrl,
     );
 
     if (response.statusCode >= 400) {

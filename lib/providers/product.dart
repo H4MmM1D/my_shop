@@ -25,14 +25,22 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(String userId, String token) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
     try {
+      var endpointUrl =
+          'https://flutter-update-65521-default-rtdb.firebaseio.com/userFavorites/$userId/$id.json';
+      Map<String, String> queryParams = {
+        'auth': token,
+      };
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      var requestUrl = endpointUrl + '?' + queryString;
+
       final response = await http.patch(
-        Uri.https(
-            'flutter-update-65521-default-rtdb.firebaseio.com', '$id.json'),
+        requestUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

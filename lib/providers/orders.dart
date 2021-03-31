@@ -21,14 +21,25 @@ class OrderItem {
 
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
+  final String authToken;
+
+  Orders(this.authToken, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
   Future<void> fetchAndSetOrders() async {
-    final response = await http.get(Uri.https(
-        'flutter-update-65521-default-rtdb.firebaseio.com', 'orders.json'));
+    var endpointUrl =
+        'https://flutter-update-65521-default-rtdb.firebaseio.com/orders.json';
+    Map<String, String> queryParams = {
+      'auth': authToken,
+    };
+    String queryString = Uri(queryParameters: queryParams).query;
+
+    var requestUrl = endpointUrl + '?' + queryString;
+
+    final response = await http.get(requestUrl);
     final List<OrderItem> loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
 
@@ -61,9 +72,17 @@ class Orders with ChangeNotifier {
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     final timestamp = DateTime.now();
+    var endpointUrl =
+        'https://flutter-update-65521-default-rtdb.firebaseio.com/orders.json';
+    Map<String, String> queryParams = {
+      'auth': authToken,
+    };
+    String queryString = Uri(queryParameters: queryParams).query;
+
+    var requestUrl = endpointUrl + '?' + queryString;
+
     final response = await http.post(
-      Uri.https(
-          'flutter-update-65521-default-rtdb.firebaseio.com', 'orders.json'),
+      requestUrl,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

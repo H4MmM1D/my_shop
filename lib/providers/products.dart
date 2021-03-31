@@ -46,6 +46,9 @@ class Products with ChangeNotifier {
   ];
 
   var _showFavoritesOnly = false;
+  final String _authToken;
+
+  Products(this._authToken, this._items);
 
   List<Product> get items {
     // if (_showFavoritesOnly) {
@@ -60,8 +63,16 @@ class Products with ChangeNotifier {
 
   Future<void> fetchAndSetProducts() async {
     try {
-      final response = await http.get(Uri.https(
-          'flutter-update-65521-default-rtdb.firebaseio.com', 'products.json'));
+      var endpointUrl =
+          'https://flutter-update-65521-default-rtdb.firebaseio.com/products.json';
+      Map<String, String> queryParams = {
+        'auth': _authToken,
+      };
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      var requestUrl = endpointUrl + '?' + queryString;
+
+      final response = await http.get(requestUrl);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
 
       if (extractedData == null) {
